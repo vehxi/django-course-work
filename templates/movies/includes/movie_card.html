@@ -1,0 +1,44 @@
+<article class="movie-card {% if movie.id in favorite_movie_ids %}movie-card--favorite-active{% endif %}">
+    <div class="movie-card__poster-shell">
+        <a href="{% url 'movie_detail' movie.pk %}" class="movie-card__link" aria-label="{{ movie.title }}">
+            {% if movie.poster %}
+                <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="movie-card__poster">
+            {% else %}
+                <div class="movie-card__placeholder">Постер скоро появится</div>
+            {% endif %}
+            <div class="movie-card__scrim"></div>
+            <div class="movie-card__rating">
+                <span class="rating-star" aria-hidden="true">★</span>
+                <span>{{ movie.get_average_rating }}</span>
+            </div>
+        </a>
+        {% if request.user.is_authenticated %}
+            <form action="{% url 'toggle_favorite' movie.pk %}" method="post" class="movie-card__favorite-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button
+                    type="submit"
+                    class="movie-card__favorite {% if movie.id in favorite_movie_ids %}active{% endif %}"
+                    aria-pressed="{% if movie.id in favorite_movie_ids %}true{% else %}false{% endif %}"
+                    aria-label="{% if movie.id in favorite_movie_ids %}Убрать из избранного{% else %}Добавить в избранное{% endif %}"
+                    title="{% if movie.id in favorite_movie_ids %}Убрать из избранного{% else %}Добавить в избранное{% endif %}"
+                >
+                    <span class="movie-card__favorite-icon" aria-hidden="true">♥</span>
+                </button>
+            </form>
+        {% else %}
+            <a
+                href="{% url 'login' %}"
+                class="movie-card__favorite"
+                aria-label="Войти, чтобы добавить в избранное"
+                title="Войти, чтобы добавить в избранное"
+            >
+                <span class="movie-card__favorite-icon" aria-hidden="true">♥</span>
+            </a>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'movie_detail' movie.pk %}" class="movie-card__body movie-card__body-link" aria-label="{{ movie.title }}">
+        <h3 class="movie-card__title">{{ movie.title }}</h3>
+    </a>
+</article>

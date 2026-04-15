@@ -1,0 +1,55 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}Профиль {{ user.username }} | KINOBASE{% endblock %}
+
+{% block content %}
+<div class="profile-shell">
+    <a href="{% url 'movie_list' %}" class="back-link-modern">← Назад в каталог</a>
+
+    <div class="bento-card profile-hero">
+        <div class="profile-hero-main">
+            {% if user.profile.photo %}
+                <img src="{{ user.profile.photo.url }}" alt="Аватар" class="profile-avatar">
+            {% else %}
+                <div class="profile-avatar-placeholder">👤</div>
+            {% endif %}
+            <div>
+                <h1 class="page-title profile-greeting">Привет, {{ user.first_name|default:user.username }}!</h1>
+                <p class="hero-subtitle profile-subtitle">
+                    {% if user.profile.date_of_birth %}Дата рождения: {{ user.profile.date_of_birth|date:"d.m.Y" }}{% endif %}
+                </p>
+                <div class="profile-actions">
+                    <a href="{% url 'edit_profile' %}" class="profile-settings-link">Настройки профиля</a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'catalog_manage' %}" class="profile-settings-link">Управлять каталогом</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="profile-stats">
+            <div class="profile-stat-card">
+                <div class="profile-stat-value">{{ reviews_count }}</div>
+                <div class="profile-stat-label">Отзывов</div>
+            </div>
+            <div class="profile-stat-card">
+                <div class="profile-stat-value profile-stat-value--favorites">{{ favorite_movies.count }}</div>
+                <div class="profile-stat-label">В избранном</div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-heading">Мое Избранное</h2>
+    <div class="movies-grid">
+        {% for movie in favorite_movies %}
+            {% include 'movies/includes/movie_card.html' with movie=movie %}
+        {% empty %}
+            <div class="empty-state">
+                <h3 class="empty-state-title">В избранном пока пусто</h3>
+                <a href="{% url 'movie_list' %}" class="btn-primary btn-primary--inline btn-primary--spaced">В каталог</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

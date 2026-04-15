@@ -1,0 +1,21 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}Каталог фильмов | KINOBASE{% endblock %}
+
+{% block content %}
+    <div class="hero-section">
+        <h1 class="page-title">Кинотека</h1>
+        <p class="hero-subtitle">Откройте для себя новые миры и истории</p>
+        
+        <form method="get" action="{% url 'movie_list' %}" class="search-form" id="search-form">
+            <input type="text" name="q" id="search-input" data-url="{% url 'movie_list' %}" value="{{ search_query }}" placeholder="Найти фильм по названию..." class="search-input" autocomplete="off">
+            <button type="submit" class="btn-primary search-btn">Найти</button>
+            <a href="{% url 'movie_list' %}" class="btn-reset-search {% if not search_query %}hidden{% endif %}" id="reset-search-btn" title="Сбросить поиск">✕</a>
+        </form>
+    </div>
+
+    <div id="search-results-region">
+        {% include 'movies/includes/movie_search_results.html' %}
+    </div>
+{% endblock %}

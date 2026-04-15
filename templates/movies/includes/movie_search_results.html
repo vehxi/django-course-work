@@ -1,0 +1,14 @@
+<h3 id="search-results-title" class="search-results-title {% if not search_query %}hidden{% endif %}">
+    Результаты по запросу: "<span id="search-query-display" class="search-query-highlight">{{ search_query }}</span>"
+</h3>
+
+<div class="movies-grid" id="movies-grid">
+    {% for movie in movies %}
+        {% include 'movies/includes/movie_card.html' with movie=movie %}
+    {% empty %}
+        <div class="empty-state">
+            <h3 class="empty-state-title">Ничего не найдено 😔</h3>
+            <p>Попробуйте изменить поисковый запрос или исправить опечатку.</p>
+        </div>
+    {% endfor %}
+</div>

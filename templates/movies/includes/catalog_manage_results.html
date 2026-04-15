@@ -1,0 +1,99 @@
+{% if view_mode == 'grid' %}
+    <section class="catalog-admin-grid" aria-label="Плитка фильмов">
+        {% for movie in movies %}
+            <article class="bento-card catalog-admin-tile">
+                <a href="{% url 'movie_detail' movie.pk %}" class="catalog-admin-tile__poster" aria-label="{{ movie.title }}">
+                    {% if movie.poster %}
+                        <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+                    {% else %}
+                        <span>Нет постера</span>
+                    {% endif %}
+                </a>
+                <div class="catalog-admin-tile__body">
+                    <h2 class="catalog-admin-tile__title">{{ movie.title }}</h2>
+                    <div class="catalog-admin-item__badges">
+                        <span class="content-type-badge content-type-badge--{{ movie.content_type }}">{{ movie.get_content_type_display }}</span>
+                        <span class="catalog-rating-pill"><span class="rating-star">★</span> {{ movie.get_average_rating }}</span>
+                    </div>
+                    <p class="catalog-admin-item__meta">
+                        <span>{{ movie.year }}</span>
+                        <span>{{ movie.duration }} мин.</span>
+                        <span>{{ movie.age_restriction }}+</span>
+                    </p>
+                    <p class="catalog-admin-item__genres">
+                        {% for genre in movie.genres.all %}
+                            {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            Жанры не указаны
+                        {% endfor %}
+                    </p>
+                    <div class="catalog-admin-item__actions">
+                        <a href="{% url 'catalog_movie_edit' movie.pk %}" class="catalog-action-link">Редактировать</a>
+                        <a href="{% url 'catalog_movie_delete' movie.pk %}" class="catalog-danger-link">Удалить</a>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="catalog-admin-empty">
+                <h3 class="empty-state-title">Фильмы не найдены</h3>
+                <p>Добавь первый фильм или измени поисковый запрос.</p>
+            </div>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="bento-card catalog-admin-table" aria-label="Список фильмов">
+        <div class="catalog-admin-table__head">
+            <span>Фильм</span>
+            <span>Данные</span>
+            <span>Жанры</span>
+            <span>Действия</span>
+        </div>
+
+        <div class="catalog-admin-table__body">
+            {% for movie in movies %}
+                <article class="catalog-admin-item">
+                    <div class="catalog-admin-item__movie">
+                        <a href="{% url 'movie_detail' movie.pk %}" class="catalog-admin-thumb" aria-label="{{ movie.title }}">
+                            {% if movie.poster %}
+                                <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+                            {% else %}
+                                <span>Нет постера</span>
+                            {% endif %}
+                        </a>
+                        <div class="catalog-admin-item__main">
+                            <h2 class="catalog-admin-item__title">{{ movie.title }}</h2>
+                            <div class="catalog-admin-item__badges">
+                                <span class="content-type-badge content-type-badge--{{ movie.content_type }}">{{ movie.get_content_type_display }}</span>
+                                <span class="catalog-rating-pill"><span class="rating-star">★</span> {{ movie.get_average_rating }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="catalog-admin-item__meta">
+                        <span>{{ movie.year }}</span>
+                        <span>{{ movie.duration }} мин.</span>
+                        <span>{{ movie.age_restriction }}+</span>
+                    </div>
+
+                    <p class="catalog-admin-item__genres">
+                        {% for genre in movie.genres.all %}
+                            {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            Жанры не указаны
+                        {% endfor %}
+                    </p>
+
+                    <div class="catalog-admin-item__actions">
+                        <a href="{% url 'catalog_movie_edit' movie.pk %}" class="catalog-action-link">Редактировать</a>
+                        <a href="{% url 'catalog_movie_delete' movie.pk %}" class="catalog-danger-link">Удалить</a>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="catalog-admin-empty">
+                    <h3 class="empty-state-title">Фильмы не найдены</h3>
+                    <p>Добавь первый фильм или измени поисковый запрос.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+{% endif %}

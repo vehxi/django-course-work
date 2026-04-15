@@ -1,0 +1,174 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}{{ movie.title }} | KINOBASE{% endblock %}
+
+{% block content %}
+<div class="movie-page-wrapper movie-page-wrapper--detail" id="page-wrapper">
+    <a href="{% url 'movie_list' %}" class="back-link-modern back-link-modern--block">← Назад в каталог</a>
+
+    <section class="movie-detail-hero bento-card">
+        <div class="movie-detail-hero__poster-column">
+            {% if movie.poster %}
+            <button type="button" class="poster-fixed poster-fixed--hero poster-fixed--button" id="poster-open-trigger" aria-label="Открыть постер фильма {{ movie.title }}">
+                <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+            </button>
+            {% else %}
+            <div class="poster-fixed poster-fixed--hero">
+                <div class="poster-empty-state">Нет постера</div>
+            </div>
+            {% endif %}
+
+            <div class="sidebar-meta movie-detail-poster-meta" aria-label="Дополнительная информация о фильме">
+                <div class="meta-item">
+                    <span class="meta-label">Год</span>
+                    <span>{{ movie.year|default:"2025" }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Хронометраж</span>
+                    <span>{{ movie.duration|default:"120" }} мин.</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Возраст</span>
+                    <span>{{ movie.age_restriction }}+</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="movie-detail-hero__content">
+            <div class="movie-detail-hero__intro">
+                <div class="title-header-flex title-header-flex--detail">
+                    <div class="movie-detail-title-block">
+                        <h1 class="movie-title-mega">{{ movie.title }}</h1>
+                        <p class="movie-detail-subtitle">
+                            {% for g in movie.genres.all %}
+                                {{ g.name }}{% if not forloop.last %} · {% endif %}
+                            {% empty %}
+                                Подборка кинотеки
+                            {% endfor %}
+                        </p>
+                    </div>
+                    {% if request.user.is_authenticated %}
+                    <form action="{% url 'toggle_favorite' movie.pk %}" method="post" class="movie-detail-favorite-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-favorite-circle btn-favorite-circle--detail {% if is_favorite %}active{% endif %}" title="В избранное" aria-label="Добавить в избранное">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="{% if is_favorite %}currentColor{% else %}none{% endif %}">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="meta-tags meta-tags--hero">
+                <span class="content-type-badge content-type-badge--{{ movie.content_type }}">{{ movie.get_content_type_display }}</span>
+                <span class="tag-rating tag-rating--hero"><span class="rating-star">★</span> {{ movie.get_average_rating }}</span>
+            </div>
+
+            <div class="description-container description-container--hero">
+                <p id="movie-desc" class="clamped-text clamped-text--hero">{{ movie.description }}</p>
+                <button id="read-more-trigger" class="read-more-btn read-more-btn--hero">Прочитать полностью</button>
+            </div>
+
+            <section class="bento-card cast-section cast-section--detail cast-section--hero">
+                <h2 class="section-title-center section-title-left">АКТЕРЫ</h2>
+                <div class="cast-list-modern" id="cast-list">
+                    {% for actor in movie.actors.all %}
+                        <div class="cast-item {% if forloop.counter > 5 %}hidden-actor{% endif %}">
+                            {{ actor.full_name }}
+                        </div>
+                    {% empty %}
+                        <p class="muted-text">Нет данных</p>
+                    {% endfor %}
+                </div>
+                {% if movie.actors.all.count > 5 %}
+                    <button class="read-more-btn read-more-btn--inline" id="toggle-cast-btn">Показать всех</button>
+                {% endif %}
+            </section>
+        </div>
+    </section>
+
+    <div class="movie-detail-secondary-grid">
+        <section class="bento-card reviews-section reviews-section--detail">
+            <div class="reviews-section__head">
+                <div>
+                    <h2 class="section-title-center section-title-left">ОТЗЫВЫ</h2>
+                    <p class="reviews-section__subtitle">Личные оценки и впечатления зрителей кинотеки.</p>
+                </div>
+            </div>
+
+            {% if request.user.is_authenticated %}
+                <div class="review-form-card review-form-card--detail">
+                    <form action="{% url 'add_review' movie.pk %}" method="post">
+                        {% csrf_token %}
+                        {{ review_form.text }}
+                        <div class="form-row">
+                            <div class="rating-group">
+                                {{ review_form.rating }}
+                                <div class="star-rating-wrapper">
+                                    <div class="stars-container" id="stars-container">
+                                        <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span>
+                                        <span class="star" data-val="3">★</span><span class="star" data-val="4">★</span>
+                                        <span class="star" data-val="5">★</span><span class="star" data-val="6">★</span>
+                                        <span class="star" data-val="7">★</span><span class="star" data-val="8">★</span>
+                                        <span class="star" data-val="9">★</span><span class="star" data-val="10">★</span>
+                                    </div>
+                                    <span class="rating-display" id="rating-display">0/10</span>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary btn-submit-review">Опубликовать</button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <div class="login-prompt login-prompt--detail">Чтобы оставить отзыв, пожалуйста, <a href="{% url 'login' %}">войдите</a> или <a href="{% url 'register' %}">зарегистрируйтесь</a>.</div>
+            {% endif %}
+
+            <div class="reviews-stack">
+                {% for review in reviews %}
+                    <div class="review-bubble">
+                        <div class="review-user-info">
+                            <div class="review-user-meta">
+                                {% if review.user.profile.photo %}
+                                    <img src="{{ review.user.profile.photo.url }}" alt="avatar" class="review-avatar">
+                                {% else %}
+                                    <div class="review-avatar-placeholder">👤</div>
+                                {% endif %}
+                                <strong>{{ review.user.username }}</strong>
+                            </div>
+                            <span class="review-rating-badge">{{ review.rating }}/10</span>
+                        </div>
+                        <p class="review-text">{{ review.text }}</p>
+                    </div>
+                {% empty %}
+                    <p class="empty-review-msg">Пока нет ни одного отзыва. Станьте первым!</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal-blur-overlay" id="desc-modal">
+    <div class="modal-body modal-body--movie-detail">
+        <button class="modal-close-btn" id="modal-close-btn" aria-label="Закрыть описание">✕</button>
+        <div class="movie-detail-modal-head">
+            <span class="section-label movie-detail-modal-kicker">Описание</span>
+            <h2 class="modal-title">{{ movie.title }}</h2>
+        </div>
+        <div class="modal-scroll-area"><p>{{ movie.description }}</p></div>
+    </div>
+</div>
+
+{% if movie.poster %}
+<div class="modal-blur-overlay modal-blur-overlay--poster" id="poster-modal">
+    <div class="modal-body modal-body--poster">
+        <button class="modal-close-btn modal-close-btn--poster" id="poster-modal-close-btn" aria-label="Закрыть постер">✕</button>
+        <figure class="poster-modal-figure">
+            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="poster-modal-image">
+            <figcaption class="poster-modal-caption">{{ movie.title }}</figcaption>
+        </figure>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Настройки | KINOBASE{% endblock %}
+
+{% block content %}
+<div class="settings-shell">
+    <a href="{% url 'profile' %}" class="back-link-modern back-link-modern--block">← Назад</a>
+
+    <section class="bento-card settings-hero">
+        <div class="settings-hero__content">
+            <p class="auth-kicker settings-kicker">PROFILE EDIT</p>
+            <h1 class="page-title auth-title settings-title">Настройки профиля</h1>
+            <p class="auth-subtitle settings-subtitle">Обнови аватарку и личные данные, чтобы профиль выглядел аккуратнее в кинотеке.</p>
+        </div>
+    </section>
+
+    <form method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data" class="settings-form">
+        {% csrf_token %}
+
+        <div class="settings-grid">
+            <aside class="settings-sidebar">
+                <section class="bento-card settings-avatar-card">
+                    <p class="section-label settings-section-label">Аватарка</p>
+                    <div class="settings-avatar-frame">
+                        {% if user.profile.photo %}
+                            <img src="{{ user.profile.photo.url }}" alt="Текущая аватарка {{ user.username }}" class="settings-avatar-preview">
+                        {% else %}
+                            <div class="settings-avatar-preview settings-avatar-preview--placeholder">👤</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-field form-field--wide">
+                        <label for="{{ profile_form.photo.id_for_label }}">Заменить фото</label>
+                        <input
+                            type="file"
+                            name="{{ profile_form.photo.html_name }}"
+                            id="{{ profile_form.photo.id_for_label }}"
+                            accept="image/*"
+                            class="settings-file-input"
+                        >
+                        <p class="settings-field-note">Показываем текущую аватарку, а не путь к файлу. Новое изображение заменит старое после сохранения.</p>
+                        {% if profile_form.photo.errors %}
+                            <div class="form-error">{{ profile_form.photo.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section class="bento-card settings-side-card">
+                    <p class="section-label settings-section-label">Быстрый превью</p>
+                    <div class="settings-side-card__rows">
+                        <div class="settings-side-card__row">
+                            <span>Имя в профиле</span>
+                            <strong>{{ user.first_name|default:user.username }}</strong>
+                        </div>
+                        <div class="settings-side-card__row">
+                            <span>Дата рождения</span>
+                            <strong>{% if user.profile.date_of_birth %}{{ user.profile.date_of_birth|date:"d.m.Y" }}{% else %}Не заполнена{% endif %}</strong>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <div class="settings-main">
+                <section class="bento-card settings-form-card">
+                    <h3 class="section-divider settings-form-card__title">Основные данные</h3>
+                    <div class="settings-fields-grid">
+                        {% for field in user_form %}
+                            <div class="form-field {% if field.name == 'email' %}settings-field-span{% endif %}">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="form-error">{{ field.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="bento-card settings-form-card">
+                    <h3 class="section-divider settings-form-card__title">Личный профиль</h3>
+                    <div class="settings-fields-grid settings-fields-grid--single">
+                        <div class="form-field">
+                            <label for="{{ profile_form.date_of_birth.id_for_label }}">{{ profile_form.date_of_birth.label }}</label>
+                            {{ profile_form.date_of_birth }}
+                            {% if profile_form.date_of_birth.errors %}
+                                <div class="form-error">{{ profile_form.date_of_birth.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <button type="submit" class="btn-primary btn-primary--full settings-submit">Сохранить изменения</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

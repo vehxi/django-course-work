@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}КИНОТЕКА{% endblock %}</title>
+    <script>
+        (() => {
+            const storedTheme = localStorage.getItem('theme');
+            const preferredTheme = storedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            document.documentElement.dataset.theme = preferredTheme;
+        })();
+    </script>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{% url 'movie_list' %}" class="navbar-brand">КИНОТЕКА</a>
+        <div class="navbar-actions">
+            <button
+                type="button"
+                class="theme-toggle"
+                id="theme-toggle"
+                aria-label="Переключить тему"
+                aria-pressed="false"
+                title="Переключить тему"
+            >
+                <span class="theme-toggle__icon" aria-hidden="true">☀️</span>
+                <span class="theme-toggle__text">Светлая тема</span>
+            </button>
+            <ul class="navbar-nav">
+                <li><a href="{% url 'movie_list' %}">Каталог</a></li>
+            {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}" class="navbar-link-accent">Профиль</a></li>
+                    <li>
+                        <form action="{% url 'logout' %}" method="post" class="navbar-inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="navbar-logout-btn">Выйти</button>
+                        </form>
+                    </li>
+            {% else %}
+                    <li><a href="{% url 'login' %}">Войти</a></li>
+                    <li><a href="{% url 'register' %}">Регистрация</a></li>
+            {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

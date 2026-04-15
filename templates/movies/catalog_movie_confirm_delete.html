@@ -1,0 +1,21 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Удалить фильм | KINOBASE{% endblock %}
+
+{% block content %}
+<div class="catalog-admin-shell catalog-admin-shell--delete">
+    <a href="{% url 'catalog_manage' %}" class="back-link-modern back-link-modern--block">← Назад к управлению</a>
+
+    <section class="bento-card catalog-delete-card">
+        <p class="auth-kicker catalog-admin-kicker">DELETE MOVIE</p>
+        <h1 class="page-title catalog-admin-title">Удалить фильм?</h1>
+        <p class="auth-subtitle catalog-admin-subtitle">“{{ object.title }}” исчезнет из каталога, избранного и связанных списков.</p>
+
+        <form method="post" class="catalog-delete-actions">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary catalog-danger-btn">Удалить</button>
+            <a href="{% url 'catalog_manage' %}" class="profile-settings-link">Оставить фильм</a>
+        </form>
+    </section>
+</div>
+{% endblock %}

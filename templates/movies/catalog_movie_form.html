@@ -1,0 +1,122 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}{% if object %}Редактировать фильм{% else %}Добавить фильм{% endif %} | KINOBASE{% endblock %}
+
+{% block content %}
+<div class="catalog-admin-shell catalog-admin-shell--form">
+    <a href="{% url 'catalog_manage' %}" class="back-link-modern back-link-modern--block">← Назад к управлению</a>
+
+    <section class="bento-card catalog-form-card">
+        <form method="post" enctype="multipart/form-data" class="catalog-form">
+            {% csrf_token %}
+
+            <div class="catalog-form-head catalog-form-head--sticky">
+                <div>
+                    <p class="auth-kicker catalog-admin-kicker">MOVIE FORM</p>
+                    <h1 class="page-title catalog-admin-title">{% if object %}Редактировать фильм{% else %}Добавить фильм{% endif %}</h1>
+                </div>
+                <div class="catalog-form-head__actions">
+                    {% if object %}
+                        <a href="{% url 'movie_detail' object.pk %}" class="profile-settings-link">Открыть на сайте</a>
+                    {% endif %}
+                    <button type="submit" class="btn-primary">Сохранить</button>
+                </div>
+            </div>
+
+            <div class="catalog-editor-grid">
+                <section class="catalog-form-panel catalog-form-panel--main">
+                    <p class="section-label catalog-form-panel__label">Основное</p>
+                    <div class="form-field">
+                        <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}<div class="form-error">{{ form.title.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="form-field">
+                        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}<div class="form-error">{{ form.description.errors|striptags }}</div>{% endif %}
+                    </div>
+                </section>
+
+                <aside class="catalog-editor-side">
+                    <section class="catalog-form-panel">
+                        <p class="section-label catalog-form-panel__label">Постер</p>
+                        <div class="catalog-poster-preview catalog-poster-preview--compact" id="catalog-poster-preview">
+                            {% if object and object.poster %}
+                                <img src="{{ object.poster.url }}" alt="{{ object.title }}">
+                            {% else %}
+                                <span>Постер появится здесь</span>
+                            {% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ form.poster.id_for_label }}">{{ form.poster.label }}</label>
+                            <input type="file" name="{{ form.poster.html_name }}" id="{{ form.poster.id_for_label }}" accept="image/*" data-poster-preview-target="catalog-poster-preview">
+                            {% if form.poster.errors %}<div class="form-error">{{ form.poster.errors|striptags }}</div>{% endif %}
+                        </div>
+                    </section>
+                </aside>
+
+                <section class="catalog-form-panel catalog-form-panel--wide">
+                    <p class="section-label catalog-form-panel__label">Параметры показа</p>
+                    <div class="catalog-form-params">
+                        <div class="form-field catalog-param-field">
+                            <label for="{{ form.content_type.id_for_label }}">{{ form.content_type.label }}</label>
+                            {{ form.content_type }}
+                            {% if form.content_type.errors %}<div class="form-error">{{ form.content_type.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="form-field catalog-param-field">
+                            <label for="{{ form.year.id_for_label }}">{{ form.year.label }}</label>
+                            {{ form.year }}
+                            {% if form.year.errors %}<div class="form-error">{{ form.year.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="form-field catalog-param-field">
+                            <label for="{{ form.duration.id_for_label }}">{{ form.duration.label }}</label>
+                            {{ form.duration }}
+                            {% if form.duration.help_text %}<p class="settings-field-note">{{ form.duration.help_text }}</p>{% endif %}
+                            {% if form.duration.errors %}<div class="form-error">{{ form.duration.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="form-field catalog-param-field">
+                            <label for="{{ form.age_restriction.id_for_label }}">{{ form.age_restriction.label }}</label>
+                            {{ form.age_restriction }}
+                            {% if form.age_restriction.help_text %}<p class="settings-field-note">{{ form.age_restriction.help_text }}</p>{% endif %}
+                            {% if form.age_restriction.errors %}<div class="form-error">{{ form.age_restriction.errors|striptags }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <div class="catalog-relations-grid">
+                    <section class="catalog-form-panel">
+                        <p class="section-label catalog-form-panel__label">Жанры</p>
+                        <div class="form-field">
+                            <label for="{{ form.genres.id_for_label }}">{{ form.genres.label }}</label>
+                            {{ form.genres }}
+                            {% if form.genres.errors %}<div class="form-error">{{ form.genres.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ form.new_genres.id_for_label }}">{{ form.new_genres.label }}</label>
+                            {{ form.new_genres }}
+                            <p class="settings-field-note">{{ form.new_genres.help_text }}</p>
+                            {% if form.new_genres.errors %}<div class="form-error">{{ form.new_genres.errors|striptags }}</div>{% endif %}
+                        </div>
+                    </section>
+
+                    <section class="catalog-form-panel">
+                        <p class="section-label catalog-form-panel__label">Актеры</p>
+                        <div class="form-field">
+                            <label for="{{ form.actors.id_for_label }}">{{ form.actors.label }}</label>
+                            {{ form.actors }}
+                            {% if form.actors.errors %}<div class="form-error">{{ form.actors.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ form.new_actors.id_for_label }}">{{ form.new_actors.label }}</label>
+                            {{ form.new_actors }}
+                            <p class="settings-field-note">{{ form.new_actors.help_text }}</p>
+                            {% if form.new_actors.errors %}<div class="form-error">{{ form.new_actors.errors|striptags }}</div>{% endif %}
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

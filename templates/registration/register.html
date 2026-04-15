@@ -1,0 +1,29 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Регистрация | KINOBASE{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card bento-card">
+        <h1 class="page-title auth-title">Создать аккаунт</h1>
+
+        <form method="post" action="{% url 'register' %}" class="auth-form auth-form--register">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-field">
+                    <label>{{ field.label }}:</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="form-error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary btn-primary--full btn-primary--spaced">Зарегистрироваться</button>
+        </form>
+        
+        <div class="auth-footer">
+            Уже есть аккаунта? <a href="{% url 'login' %}">Войти</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

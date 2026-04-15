@@ -1,0 +1,54 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Управление каталогом | KINOBASE{% endblock %}
+
+{% block content %}
+<div class="catalog-admin-shell">
+    <a href="{% url 'profile' %}" class="back-link-modern back-link-modern--block">← Назад в профиль</a>
+
+    <section class="catalog-admin-top">
+        <div>
+            <p class="auth-kicker catalog-admin-kicker">CATALOG ADMIN</p>
+            <h1 class="page-title catalog-admin-title">Управление каталогом</h1>
+            <p class="auth-subtitle catalog-admin-subtitle">Рабочая панель для фильмов, жанров и актеров.</p>
+        </div>
+        <a href="{% url 'catalog_movie_add' %}" class="btn-primary catalog-admin-add">Добавить фильм</a>
+    </section>
+
+    <section class="bento-card catalog-admin-panel">
+        <div class="catalog-admin-metrics" aria-label="Статистика каталога">
+            <div class="catalog-metric">
+                <span class="catalog-metric__value">{{ movies_count }}</span>
+                <span class="catalog-metric__label">Фильмов</span>
+            </div>
+            <div class="catalog-metric">
+                <span class="catalog-metric__value">{{ genres_count }}</span>
+                <span class="catalog-metric__label">Жанров</span>
+            </div>
+            <div class="catalog-metric">
+                <span class="catalog-metric__value">{{ actors_count }}</span>
+                <span class="catalog-metric__label">Актеров</span>
+            </div>
+        </div>
+
+        <form method="get" action="{% url 'catalog_manage' %}" class="catalog-admin-search" id="catalog-search-form">
+            <input type="hidden" name="view" id="catalog-view-input" value="{{ view_mode }}">
+            <input type="text" name="q" id="catalog-search-input" data-url="{% url 'catalog_manage' %}" value="{{ search_query }}" placeholder="Найти фильм, жанр или актера..." autocomplete="off">
+            <button type="submit" class="btn-primary">Найти</button>
+            <a href="{% url 'catalog_manage' %}?view={{ view_mode }}" class="catalog-admin-clear {% if not search_query %}hidden{% endif %}" id="catalog-reset-search">Сбросить</a>
+        </form>
+    </section>
+
+    <div class="catalog-view-toolbar" aria-label="Вид каталога">
+        <span class="catalog-view-toolbar__label">Вид просмотра</span>
+        <div class="catalog-view-switch">
+            <a href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}view=list" class="catalog-view-option {% if view_mode == 'list' %}active{% endif %}" data-catalog-view="list">Список</a>
+            <a href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}view=grid" class="catalog-view-option {% if view_mode == 'grid' %}active{% endif %}" data-catalog-view="grid">Плитка</a>
+        </div>
+    </div>
+
+    <div id="catalog-results-region">
+        {% include 'movies/includes/catalog_manage_results.html' %}
+    </div>
+</div>
+{% endblock %}
