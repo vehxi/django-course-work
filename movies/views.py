@@ -1,3 +1,4 @@
+from django.db.models import Avg, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -25,6 +26,8 @@ class MovieListView(ListView):
     def get_queryset(self):
         queryset = Movie.objects.prefetch_related('genres').all()
         query = self.request.GET.get('q', '').strip()
+        sort_by = self.request.GET.get('sort', '-id')
+
         if query:
             queryset = (
                 queryset
@@ -33,14 +36,23 @@ class MovieListView(ListView):
                     Q(title__icontains=query) |
                     Q(similarity__gt=0.08)
                 )
-                .order_by('-similarity', 'title')
-                .distinct()
             )
-        return queryset
+
+        if sort_by == 'rating':
+            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating', '-id')
+        elif sort_by == 'title':
+            queryset = queryset.order_by('title')
+        elif sort_by == '-id':
+            queryset = queryset.order_by('-id')
+        elif query:
+            queryset = queryset.order_by('-similarity', 'title')
+
+        return queryset.distinct() if query else queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('q', '')
+        context['current_sort'] = self.request.GET.get('sort', '-id')
         if self.request.user.is_authenticated:
             context['favorite_movie_ids'] = list(
                 self.request.user.favorite_movies.values_list('id', flat=True)

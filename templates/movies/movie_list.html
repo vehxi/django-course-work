@@ -15,6 +15,23 @@
         </form>
     </div>
 
+    <!-- Панель сортировки -->
+    <div class="sorting-panel" style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px;">
+        <span class="sorting-label" style="color: #888;">Сортировка:</span>
+        <a href="?sort=-id{% if search_query %}&q={{ search_query }}{% endif %}" 
+           style="text-decoration: none; color: {% if current_sort == '-id' %}#fff; font-weight: bold; border-bottom: 2px solid #e50914;{% else %}#ccc{% endif %};">
+           Новинки
+        </a>
+        <a href="?sort=rating{% if search_query %}&q={{ search_query }}{% endif %}" 
+           style="text-decoration: none; color: {% if current_sort == 'rating' %}#fff; font-weight: bold; border-bottom: 2px solid #e50914;{% else %}#ccc{% endif %};">
+           По рейтингу
+        </a>
+        <a href="?sort=title{% if search_query %}&q={{ search_query }}{% endif %}" 
+           style="text-decoration: none; color: {% if current_sort == 'title' %}#fff; font-weight: bold; border-bottom: 2px solid #e50914;{% else %}#ccc{% endif %};">
+           По алфавиту
+        </a>
+    </div>
+
     <div id="search-results-region">
         {% include 'movies/includes/movie_search_results.html' %}
     </div>
