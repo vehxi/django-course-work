@@ -1,4 +1,5 @@
-from django.db.models import Avg, Q
+from django.db.models import Avg, Q, F
+from django.db.models.functions import Lower, Collate
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -39,9 +40,9 @@ class MovieListView(ListView):
             )
 
         if sort_by == 'rating':
-            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating', '-id')
+            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).order_by(F('avg_rating').desc(nulls_last=True), '-id')
         elif sort_by == 'title':
-            queryset = queryset.order_by('title')
+            queryset = queryset.order_by(Collate(Lower('title'), 'C'))
         elif sort_by == '-id':
             queryset = queryset.order_by('-id')
         elif query:
