@@ -28,6 +28,7 @@ class MovieListView(ListView):
         queryset = Movie.objects.prefetch_related('genres').all()
         query = self.request.GET.get('q', '').strip()
         sort_by = self.request.GET.get('sort', '-id')
+        genre_ids = self.request.GET.getlist('genre')
 
         if query:
             queryset = (
@@ -48,12 +49,19 @@ class MovieListView(ListView):
         elif query:
             queryset = queryset.order_by('-similarity', 'title')
 
-        return queryset.distinct() if query else queryset
+        if genre_ids:
+            for gid in genre_ids:
+                if gid.isdigit():
+                    queryset = queryset.filter(genres__id=gid)
+
+        return queryset.distinct() if (query or genre_ids) else queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('q', '')
         context['current_sort'] = self.request.GET.get('sort', '-id')
+        context['current_genres'] = self.request.GET.getlist('genre')
+        context['genres'] = Genre.objects.all().order_by('name')
         if self.request.user.is_authenticated:
             context['favorite_movie_ids'] = list(
                 self.request.user.favorite_movies.values_list('id', flat=True)

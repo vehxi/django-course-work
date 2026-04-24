@@ -48,11 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const buildSearchUrl = (query) => {
             const url = new URL(searchUrl, window.location.origin);
-
+            const params = new URLSearchParams(new FormData(searchForm));
             if (query) {
-                url.searchParams.set('q', query);
+                params.set('q', query);
+            } else {
+                params.delete('q');
             }
-
+            url.search = params.toString();
             return url;
         };
 

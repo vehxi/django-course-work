@@ -4,35 +4,89 @@
 {% block title %}Каталог фильмов | KINOBASE{% endblock %}
 
 {% block content %}
-    <div class="hero-section">
-        <h1 class="page-title">Кинотека</h1>
-        <p class="hero-subtitle">Откройте для себя новые миры и истории</p>
-        
-        <form method="get" action="{% url 'movie_list' %}" class="search-form" id="search-form">
-            <input type="text" name="q" id="search-input" data-url="{% url 'movie_list' %}" value="{{ search_query }}" placeholder="Найти фильм по названию..." class="search-input" autocomplete="off">
-            <button type="submit" class="btn-primary search-btn">Найти</button>
-            <a href="{% url 'movie_list' %}" class="btn-reset-search {% if not search_query %}hidden{% endif %}" id="reset-search-btn" title="Сбросить поиск">✕</a>
-        </form>
-    </div>
+    <style>
+        .catalog-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        @media (max-width: 768px) {
+            .catalog-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        .sort-btn {
+            background: none;
+            border: none;
+            padding: 5px 0;
+            cursor: pointer;
+            font-size: var(--text-base);
+            font-family: inherit;
+            color: var(--text-secondary);
+        }
+        .sort-btn.active {
+            color: var(--text-main);
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent);
+        }
+        .sort-btn:hover {
+            color: var(--text-main);
+        }
+    </style>
 
-    <!-- Панель сортировки -->
-    <div class="sorting-panel" style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px;">
-        <span class="sorting-label" style="color: var(--text-secondary);">Сортировка:</span>
-        <a href="?sort=-id{% if search_query %}&q={{ search_query }}{% endif %}" 
-           style="text-decoration: none; color: {% if current_sort == '-id' %}var(--text-main); font-weight: bold; border-bottom: 2px solid var(--accent);{% else %}var(--text-secondary){% endif %};">
-           Новинки
-        </a>
-        <a href="?sort=rating{% if search_query %}&q={{ search_query }}{% endif %}" 
-           style="text-decoration: none; color: {% if current_sort == 'rating' %}var(--text-main); font-weight: bold; border-bottom: 2px solid var(--accent);{% else %}var(--text-secondary){% endif %};">
-           По рейтингу
-        </a>
-        <a href="?sort=title{% if search_query %}&q={{ search_query }}{% endif %}" 
-           style="text-decoration: none; color: {% if current_sort == 'title' %}var(--text-main); font-weight: bold; border-bottom: 2px solid var(--accent);{% else %}var(--text-secondary){% endif %};">
-           По алфавиту
-        </a>
-    </div>
+    <form method="get" action="{% url 'movie_list' %}" id="search-form">
+        <div class="hero-section" style="margin-bottom: 30px;">
+            <h1 class="page-title">Кинотека</h1>
+            <p class="hero-subtitle">Откройте для себя новые миры и истории</p>
+            
+            <div class="search-form" id="search-form-container">
+                <input type="text" name="q" id="search-input" data-url="{% url 'movie_list' %}" value="{{ search_query }}" placeholder="Найти фильм по названию..." class="search-input" autocomplete="off">
+                <button type="submit" class="btn-primary search-btn">Найти</button>
+                <a href="{% url 'movie_list' %}" class="btn-reset-search {% if not search_query %}hidden{% endif %}" id="reset-search-btn" title="Сбросить поиск">✕</a>
+            </div>
+        </div>
 
-    <div id="search-results-region">
-        {% include 'movies/includes/movie_search_results.html' %}
-    </div>
+        <div class="catalog-layout">
+            
+            <!-- Sidebar with filters -->
+            <aside class="sidebar-filters" style="background: var(--card-bg); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
+                <div style="margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+                        <h3 style="margin: 0; font-size: var(--text-lg); color: var(--text-main);">Жанры</h3>
+                        <button type="button" onclick="document.querySelectorAll('input[name=genre]').forEach(cb => cb.checked = false); document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));" style="background: none; border: none; cursor: pointer; color: var(--accent); font-size: var(--text-sm); padding: 0;">Сбросить</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for genre in genres %}
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-secondary); font-size: var(--text-base);">
+                            <input type="checkbox" name="genre" value="{{ genre.id }}" {% if genre.id|stringformat:'s' in current_genres %}checked{% endif %} onchange="document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
+                            {{ genre.name }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="catalog-content">
+                <input type="hidden" name="sort" id="sort-input" value="{{ current_sort }}">
+                <div class="sorting-panel" style="display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                    <span class="sorting-label" style="color: var(--text-secondary); padding: 5px 0;">Сортировка:</span>
+                    <button type="button" class="sort-btn {% if current_sort == '-id' %}active{% endif %}" onclick="document.getElementById('sort-input').value='-id'; document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
+                       Новинки
+                    </button>
+                    <button type="button" class="sort-btn {% if current_sort == 'rating' %}active{% endif %}" onclick="document.getElementById('sort-input').value='rating'; document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
+                       По рейтингу
+                    </button>
+                    <button type="button" class="sort-btn {% if current_sort == 'title' %}active{% endif %}" onclick="document.getElementById('sort-input').value='title'; document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
+                       По алфавиту
+                    </button>
+                </div>
+
+                <div id="search-results-region">
+                    {% include 'movies/includes/movie_search_results.html' %}
+                </div>
+            </main>
+        </div>
+    </form>
 {% endblock %}
