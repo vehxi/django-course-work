@@ -1,4 +1,4 @@
-from django.db.models import Avg, Q, F
+from django.db.models import Avg, Q, F, Count
 from django.db.models.functions import Lower, Collate
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -42,6 +42,8 @@ class MovieListView(ListView):
 
         if sort_by == 'rating':
             queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).order_by(F('avg_rating').desc(nulls_last=True), '-id')
+        elif sort_by == '-rating':
+            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).filter(avg_rating__isnull=False).order_by(F('avg_rating').asc(nulls_last=True), '-id')
         elif sort_by == 'title':
             queryset = queryset.order_by(Collate(Lower('title'), 'C'))
         elif sort_by == '-id':
@@ -62,6 +64,47 @@ class MovieListView(ListView):
         context['current_sort'] = self.request.GET.get('sort', '-id')
         context['current_genres'] = self.request.GET.getlist('genre')
         context['genres'] = Genre.objects.all().order_by('name')
+        context['current_view'] = self.request.GET.get('view', 'catalog')
+        
+        search_q = self.request.GET.get('q', '')
+        genres = self.request.GET.getlist('genre')
+        context['show_recommendations'] = not bool(search_q or genres)
+        
+        if context['current_view'] == 'collections':
+            # Лучшие
+            context['col_best'] = Movie.objects.annotate(
+                avg_rating=Avg('reviews__rating')
+            ).order_by(F('avg_rating').desc(nulls_last=True), '-id')[:10]
+            
+            # Худшие
+            context['col_worst'] = Movie.objects.annotate(
+                avg_rating=Avg('reviews__rating')
+            ).filter(avg_rating__isnull=False).order_by('avg_rating', '-id')[:10]
+            
+            # На основе интересов
+            interest_based = []
+            if self.request.user.is_authenticated:
+                favorite_movies = self.request.user.favorite_movies.all()
+                if favorite_movies.exists():
+                    top_genres = Genre.objects.filter(
+                        movies__in=favorite_movies
+                    ).annotate(
+                        fav_count=Count('movies', filter=Q(movies__in=favorite_movies))
+                    ).order_by('-fav_count')[:3]
+                    
+                    if top_genres:
+                        interest_based = Movie.objects.filter(
+                            genres__in=top_genres
+                        ).exclude(
+                            id__in=favorite_movies.values_list('id', flat=True)
+                        ).distinct().order_by('-id')[:10]
+            context['col_interests'] = interest_based
+            
+        elif context['show_recommendations']:
+            context['recommended_movies'] = Movie.objects.annotate(
+                avg_rating=Avg('reviews__rating')
+            ).order_by(F('avg_rating').desc(nulls_last=True), '-id')[:4]
+            
         if self.request.user.is_authenticated:
             context['favorite_movie_ids'] = list(
                 self.request.user.favorite_movies.values_list('id', flat=True)

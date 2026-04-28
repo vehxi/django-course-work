@@ -11,6 +11,9 @@
             gap: 30px;
             align-items: start;
         }
+        .catalog-content {
+            min-width: 0;
+        }
         @media (max-width: 768px) {
             .catalog-layout {
                 grid-template-columns: 1fr;
@@ -51,7 +54,16 @@
             
             <!-- Sidebar with filters -->
             <aside class="sidebar-filters" style="background: var(--card-bg); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
+                
+                <input type="hidden" name="view" id="view-input" value="{{ current_view }}">
                 <div style="margin-bottom: 25px;">
+                    <div style="display: flex; background: var(--bg-color); border-radius: var(--radius-pill); padding: 4px; gap: 4px;">
+                        <button type="button" onclick="document.getElementById('view-input').value='catalog'; document.getElementById('search-form').submit();" style="flex: 1; padding: 8px; border-radius: var(--radius-pill); border: none; cursor: pointer; font-size: var(--text-sm); transition: all 0.2s ease; {% if current_view != 'collections' %}background: var(--card-bg); color: var(--text-main); font-weight: bold; box-shadow: var(--shadow-sm);{% else %}background: transparent; color: var(--text-secondary);{% endif %}">Каталог</button>
+                        <button type="button" onclick="document.getElementById('view-input').value='collections'; document.getElementById('search-form').submit();" style="flex: 1; padding: 8px; border-radius: var(--radius-pill); border: none; cursor: pointer; font-size: var(--text-sm); transition: all 0.2s ease; {% if current_view == 'collections' %}background: var(--card-bg); color: var(--text-main); font-weight: bold; box-shadow: var(--shadow-sm);{% else %}background: transparent; color: var(--text-secondary);{% endif %}">Подборки</button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px; transition: opacity 0.3s; {% if current_view == 'collections' %}opacity: 0.5; pointer-events: none;{% endif %}">
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
                         <h3 style="margin: 0; font-size: var(--text-lg); color: var(--text-main);">Жанры</h3>
                         <button type="button" onclick="document.querySelectorAll('input[name=genre]').forEach(cb => cb.checked = false); document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));" style="background: none; border: none; cursor: pointer; color: var(--accent); font-size: var(--text-sm); padding: 0;">Сбросить</button>
@@ -70,7 +82,7 @@
             <!-- Main Content -->
             <main class="catalog-content">
                 <input type="hidden" name="sort" id="sort-input" value="{{ current_sort }}">
-                <div class="sorting-panel" style="display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                <div class="sorting-panel {% if current_view == 'collections' %}hidden{% endif %}" style="display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
                     <span class="sorting-label" style="color: var(--text-secondary); padding: 5px 0;">Сортировка:</span>
                     <button type="button" class="sort-btn {% if current_sort == '-id' %}active{% endif %}" onclick="document.getElementById('sort-input').value='-id'; document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
                        Новинки

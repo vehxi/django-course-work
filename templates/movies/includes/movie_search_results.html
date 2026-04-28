@@ -1,14 +1,78 @@
-<h3 id="search-results-title" class="search-results-title {% if not search_query %}hidden{% endif %}">
-    Результаты по запросу: "<span id="search-query-display" class="search-query-highlight">{{ search_query }}</span>"
-</h3>
-
-<div class="movies-grid" id="movies-grid">
-    {% for movie in movies %}
-        {% include 'movies/includes/movie_card.html' with movie=movie %}
-    {% empty %}
-        <div class="empty-state">
-            <h3 class="empty-state-title">Ничего не найдено 😔</h3>
-            <p>Попробуйте изменить поисковый запрос или исправить опечатку.</p>
+{% if current_view == 'collections' %}
+    <div style="margin-bottom: 30px;">
+        <h2 style="font-size: var(--text-xl); color: var(--text-main); margin-bottom: 5px;">Популярные подборки</h2>
+        <p style="color: var(--text-secondary); font-size: var(--text-sm);">Откройте для себя новые фильмы и сериалы</p>
+    </div>
+    
+    <!-- Лучшие фильмы и сериалы -->
+    <div style="margin-bottom: 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="font-size: var(--text-lg); margin: 0; display: flex; align-items: center; gap: 8px;"><span>🏆</span> Лучшие по рейтингу</h3>
+            <a href="?sort=rating" onclick="document.getElementById('sort-input').value='rating'; document.getElementById('view-input').value='catalog'; document.getElementById('search-form').submit(); return false;" style="color: var(--accent); text-decoration: none; font-size: var(--text-sm); font-weight: bold;">Смотреть все →</a>
         </div>
-    {% endfor %}
-</div>
+        <div class="carousel-wrapper">
+            <button type="button" class="carousel-nav prev" onclick="this.nextElementSibling.scrollBy({left: -600, behavior: 'smooth'})">‹</button>
+            <div class="carousel-grid">
+                {% for movie in col_best %}
+                    {% include 'movies/includes/movie_card.html' with movie=movie %}
+                {% empty %}
+                    <p style="color: var(--text-secondary);">Нет фильмов</p>
+                {% endfor %}
+            </div>
+            <button type="button" class="carousel-nav next" onclick="this.previousElementSibling.scrollBy({left: 600, behavior: 'smooth'})">›</button>
+        </div>
+    </div>
+
+    <!-- Худшие фильмы и сериалы -->
+    <div style="margin-bottom: 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="font-size: var(--text-lg); margin: 0; display: flex; align-items: center; gap: 8px;"><span>📉</span> Худшие по рейтингу</h3>
+            <a href="?sort=-rating" onclick="document.getElementById('sort-input').value='-rating'; document.getElementById('view-input').value='catalog'; document.getElementById('search-form').submit(); return false;" style="color: var(--accent); text-decoration: none; font-size: var(--text-sm); font-weight: bold;">Смотреть все →</a>
+        </div>
+        <div class="carousel-wrapper">
+            <button type="button" class="carousel-nav prev" onclick="this.nextElementSibling.scrollBy({left: -600, behavior: 'smooth'})">‹</button>
+            <div class="carousel-grid">
+                {% for movie in col_worst %}
+                    {% include 'movies/includes/movie_card.html' with movie=movie %}
+                {% empty %}
+                    <p style="color: var(--text-secondary);">Пока нет оценок</p>
+                {% endfor %}
+            </div>
+            <button type="button" class="carousel-nav next" onclick="this.previousElementSibling.scrollBy({left: 600, behavior: 'smooth'})">›</button>
+        </div>
+    </div>
+
+    <!-- На основе ваших интересов -->
+    {% if col_interests %}
+    <div style="margin-bottom: 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="font-size: var(--text-lg); margin: 0; display: flex; align-items: center; gap: 8px;"><span>💖</span> На основе ваших интересов</h3>
+        </div>
+        <div class="carousel-wrapper">
+            <button type="button" class="carousel-nav prev" onclick="this.nextElementSibling.scrollBy({left: -600, behavior: 'smooth'})">‹</button>
+            <div class="carousel-grid">
+                {% for movie in col_interests %}
+                    {% include 'movies/includes/movie_card.html' with movie=movie %}
+                {% endfor %}
+            </div>
+            <button type="button" class="carousel-nav next" onclick="this.previousElementSibling.scrollBy({left: 600, behavior: 'smooth'})">›</button>
+        </div>
+    </div>
+    {% endif %}
+
+{% else %}
+    <h3 id="search-results-title" class="search-results-title {% if not search_query %}hidden{% endif %}">
+        Результаты по запросу: "<span id="search-query-display" class="search-query-highlight">{{ search_query }}</span>"
+    </h3>
+
+    <div class="movies-grid" id="movies-grid">
+        {% for movie in movies %}
+            {% include 'movies/includes/movie_card.html' with movie=movie %}
+        {% empty %}
+            <div class="empty-state">
+                <h3 class="empty-state-title">Ничего не найдено 😔</h3>
+                <p>Попробуйте изменить поисковый запрос или исправить опечатку.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
