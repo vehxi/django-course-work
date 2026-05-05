@@ -4,6 +4,8 @@ from . import views
 
 urlpatterns = [
     path('', views.MovieListView.as_view(), name='movie_list'),
+    path('export/', views.ExportMoviesView.as_view(), name='export_movies'),
+    path('export/pdf/', views.ExportMoviesPDFView.as_view(), name='export_movies_pdf'),
     path('movie/<int:pk>/', views.MovieDetailView.as_view(), name='movie_detail'),
     path('movie/<int:pk>/add_review/', views.AddReviewView.as_view(), name='add_review'),
     path('movie/<int:pk>/toggle_favorite/', views.ToggleFavoriteView.as_view(), name='toggle_favorite'),

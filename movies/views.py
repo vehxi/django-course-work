@@ -10,6 +10,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
+import openpyxl
+import os
+from django.conf import settings
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 from .models import Actor, Genre, Movie, Review
 from .forms import MovieCatalogForm, ReviewForm, UserRegistrationForm, UserEditForm, ProfileEditForm
@@ -122,6 +132,115 @@ class MovieListView(ListView):
             )
             return HttpResponse(html, **response_kwargs)
         return super().render_to_response(context, **response_kwargs)
+
+class ExportMoviesView(MovieListView):
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        
+        # Гарантируем наличие рейтинга для экспорта
+        queryset = queryset.annotate(export_rating=Avg('reviews__rating'))
+        
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = 'Каталог фильмов'
+        
+        headers = ['ID', 'Название', 'Год', 'Длительность (мин)', 'Возраст', 'Жанры', 'Рейтинг']
+        sheet.append(headers)
+        
+        # Стилизация заголовков
+        for cell in sheet[1]:
+            cell.font = openpyxl.styles.Font(bold=True)
+            
+        for movie in queryset:
+            genres_str = ', '.join([g.name for g in movie.genres.all()])
+            rating = movie.export_rating
+            rating_str = f"{rating:.1f}" if rating else "Нет оценок"
+            
+            sheet.append([
+                movie.id,
+                movie.title,
+                movie.year,
+                movie.duration,
+                f"{movie.age_restriction}+",
+                genres_str,
+                rating_str
+            ])
+            
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="movies_catalog.xlsx"'
+        workbook.save(response)
+        
+        return response
+
+class ExportMoviesPDFView(MovieListView):
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        queryset = queryset.annotate(export_rating=Avg('reviews__rating'))
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="movies_report.pdf"'
+        
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+        
+        font_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'Roboto-Regular.ttf')
+        pdfmetrics.registerFont(TTFont('Roboto', font_path))
+        
+        elements = []
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'TitleStyle', 
+            parent=styles['Title'], 
+            fontName='Roboto',
+            fontSize=16,
+            spaceAfter=20,
+            textColor=colors.HexColor('#222222')
+        )
+        elements.append(Paragraph("Отчет: Каталог фильмов", title_style))
+        
+        data = [['ID', 'Название', 'Год', 'Длительность (мин)', 'Возраст', 'Жанры', 'Рейтинг']]
+        
+        cell_style = ParagraphStyle('Normal_Roboto', fontName='Roboto', fontSize=10)
+        
+        for movie in queryset:
+            genres_str = ', '.join([g.name for g in movie.genres.all()])
+            rating = f"{movie.export_rating:.1f}" if movie.export_rating else "Нет оценок"
+            
+            data.append([
+                str(movie.id),
+                Paragraph(movie.title, cell_style),
+                str(movie.year),
+                str(movie.duration),
+                f"{movie.age_restriction}+",
+                Paragraph(genres_str, cell_style),
+                rating
+            ])
+            
+        if len(data) == 1:
+            data.append(["", "Нет данных по выбранным фильтрам", "", "", "", "", ""])
+            
+        # Ширины колонок для ландшафтного A4 (ширина ~842)
+        table = Table(data, colWidths=[30, 200, 40, 110, 55, 260, 70])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f4f4f4')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#333333')),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Roboto'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        pdf = buffer.getvalue()
+        buffer.close()
+        response.write(pdf)
+        
+        return response
 
 class MovieDetailView(DetailView):
     model = Movie

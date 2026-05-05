@@ -77,6 +77,16 @@
                         {% endfor %}
                     </div>
                 </div>
+
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+                    <button type="button" onclick="const f = document.getElementById('search-form'); f.action = '{% url "export_movies" %}'; f.submit(); setTimeout(() => f.action = '{% url "movie_list" %}', 100);" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: color-mix(in srgb, var(--accent) 15%, transparent); border: 1px solid var(--accent); border-radius: var(--radius-md); color: var(--accent); font-weight: bold; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff';" onmouseout="this.style.background='color-mix(in srgb, var(--accent) 15%, transparent)'; this.style.color='var(--accent)';">
+                        <span style="font-size: 1.2em;">📥</span> Экспорт (Excel)
+                    </button>
+                    <button type="button" onclick="const f = document.getElementById('search-form'); f.action = '{% url "export_movies_pdf" %}'; f.submit(); setTimeout(() => f.action = '{% url "movie_list" %}', 100);" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: color-mix(in srgb, #ff4757 15%, transparent); border: 1px solid #ff4757; border-radius: var(--radius-md); color: #ff4757; font-weight: bold; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='#ff4757'; this.style.color='#fff';" onmouseout="this.style.background='color-mix(in srgb, #ff4757 15%, transparent)'; this.style.color='#ff4757';">
+                        <span style="font-size: 1.2em;">📄</span> Экспорт (PDF)
+                    </button>
+                    <p style="font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 5px; margin-bottom: 0;">Скачать текущую подборку</p>
+                </div>
             </aside>
 
             <!-- Main Content -->
