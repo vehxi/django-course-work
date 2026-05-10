@@ -88,3 +88,7 @@ LOGIN_REDIRECT_URL = 'profile'
 LOGOUT_REDIRECT_URL = 'movie_list'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
+
+# Email (вывод в консоль для курсовой)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@kinoteka.ru'

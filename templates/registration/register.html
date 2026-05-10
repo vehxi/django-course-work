@@ -1,13 +1,14 @@
 {% extends 'movies/base.html' %}
+{% load static %}
 
-{% block title %}Регистрация | KINOBASE{% endblock %}
+{% block title %}Регистрация | КИНОТЕКА{% endblock %}
 
 {% block content %}
 <div class="auth-wrapper">
     <div class="auth-card bento-card">
         <h1 class="page-title auth-title">Создать аккаунт</h1>
 
-        <form method="post" action="{% url 'register' %}" class="auth-form auth-form--register">
+        <form method="post" action="{% url 'register' %}" class="auth-form auth-form--register" id="register-form">
             {% csrf_token %}
             {% for field in form %}
                 <div class="form-field">
@@ -26,4 +27,7 @@
         </div>
     </div>
 </div>
+
+<!-- Подключение клиентской валидации -->
+<script src="{% static 'js/validation.js' %}"></script>
 {% endblock %}

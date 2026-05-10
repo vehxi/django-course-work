@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.core.mail import send_mail
 import openpyxl
 import os
 from django.conf import settings
@@ -369,6 +370,16 @@ class RegisterView(View):
             new_user.set_password(form.cleaned_data['password'])
             new_user.save()
             Profile.objects.create(user=new_user)
+            
+            # Отправка системного уведомления
+            send_mail(
+                subject='Добро пожаловать в КИНОТЕКА!',
+                message=f'Здравствуйте, {new_user.username}!\n\nСпасибо за регистрацию в нашей системе "Учет фильмов". Теперь вы можете оставлять отзывы, ставить оценки и собирать свои коллекции!\n\nС уважением,\nКоманда КИНОТЕКА',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[new_user.email],
+                fail_silently=False,
+            )
+            
             return redirect('login')
         return render(request, 'registration/register.html', {'form': form})
 
