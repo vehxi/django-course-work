@@ -52,9 +52,9 @@ class MovieListView(ListView):
             )
 
         if sort_by == 'rating':
-            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).order_by(F('avg_rating').desc(nulls_last=True), '-id')
+            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).order_by(F('avg_rating').desc(nulls_last=True), Collate(Lower('title'), 'C'))
         elif sort_by == '-rating':
-            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).filter(avg_rating__isnull=False).order_by(F('avg_rating').asc(nulls_last=True), '-id')
+            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).filter(avg_rating__isnull=False).order_by(F('avg_rating').asc(nulls_last=True), Collate(Lower('title'), 'C'))
         elif sort_by == 'title':
             queryset = queryset.order_by(Collate(Lower('title'), 'C'))
         elif sort_by == '-id':
@@ -325,8 +325,13 @@ class CatalogManageView(StaffRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('q', '')
-        view_mode = self.request.GET.get('view', 'list')
-        context['view_mode'] = view_mode if view_mode in {'list', 'grid'} else 'list'
+        view_mode = self.request.GET.get('view')
+        if view_mode in {'list', 'grid'}:
+            self.request.session['catalog_view_mode'] = view_mode
+        else:
+            view_mode = self.request.session.get('catalog_view_mode', 'list')
+        
+        context['view_mode'] = view_mode
         context['movies_count'] = Movie.objects.count()
         context['genres_count'] = Genre.objects.count()
         context['actors_count'] = Actor.objects.count()

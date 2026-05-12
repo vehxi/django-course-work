@@ -698,6 +698,7 @@ input.search-input:focus,
 }
 
 .movie-card__scrim {
+    display: none;
     position: absolute;
     inset: auto 0 0;
     height: 44%;
@@ -746,11 +747,12 @@ input.search-input:focus,
     color: var(--text-main);
     font-size: clamp(1.15rem, 1.04rem + 0.52vw, 1.45rem);
     font-weight: 600;
-    line-height: var(--leading-tight);
+    line-height: 1.25;
     letter-spacing: var(--tracking-title);
     text-transform: uppercase;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    padding-bottom: 2px;
 }
 
 .movie-card__favorite-form {

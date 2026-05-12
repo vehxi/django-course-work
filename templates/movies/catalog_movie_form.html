@@ -3,6 +3,77 @@
 {% block title %}{% if object %}Редактировать фильм{% else %}Добавить фильм{% endif %} | КИНОТЕКА{% endblock %}
 
 {% block content %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+<style>
+    /* TomSelect Theme Overrides */
+    .ts-wrapper {
+        position: relative !important;
+        width: 100%;
+        min-height: auto !important;
+    }
+    .ts-control {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        border-radius: var(--radius-sm);
+        padding: 0.8rem 1rem;
+        min-height: 48px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+    }
+    .ts-control > input {
+        color: var(--text-main);
+        background: transparent;
+        border: none;
+        outline: none;
+        flex: 1;
+        min-width: 50px;
+    }
+    .ts-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+        margin-top: 4px !important;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        border-radius: var(--radius-sm);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        max-height: 250px;
+    }
+    .ts-dropdown .active {
+        background-color: color-mix(in srgb, var(--accent) 20%, transparent);
+        color: var(--accent);
+    }
+    .ts-dropdown .option {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+    .ts-dropdown .option:hover {
+        background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+    }
+    .ts-control .item {
+        background-color: var(--accent);
+        color: #fff;
+        border-radius: var(--radius-sm);
+        padding: 4px 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .ts-hidden-accessible {
+        display: none !important;
+    }
+</style>
+
 <div class="catalog-admin-shell catalog-admin-shell--form">
     <a href="{% url 'catalog_manage' %}" class="back-link-modern back-link-modern--block">← Назад к управлению</a>
 
@@ -12,7 +83,7 @@
 
             <div class="catalog-form-head catalog-form-head--sticky">
                 <div>
-                    <p class="auth-kicker catalog-admin-kicker">MOVIE FORM</p>
+
                     <h1 class="page-title catalog-admin-title">{% if object %}Редактировать фильм{% else %}Добавить фильм{% endif %}</h1>
                 </div>
                 <div class="catalog-form-head__actions">
@@ -119,4 +190,22 @@
         </form>
     </section>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tsConfig = {
+            plugins: ['remove_button'],
+            create: false,
+            placeholder: 'Выберите из списка...',
+            maxOptions: null
+        };
+        
+        if (document.getElementById('id_genres')) {
+            new TomSelect('#id_genres', tsConfig);
+        }
+        if (document.getElementById('id_actors')) {
+            new TomSelect('#id_actors', tsConfig);
+        }
+    });
+</script>
 {% endblock %}
