@@ -506,7 +506,7 @@ input[type="file"]::file-selector-button {
 input.search-input,
 #search-input {
     flex: 1;
-    padding: 0.25rem 0;
+    padding: 0.25rem 0.8rem;
     border: 0 !important;
     border-radius: 0;
     background: transparent !important;
@@ -2207,6 +2207,7 @@ input.search-input:focus,
 
 .catalog-admin-search input {
     flex: 1;
+    padding-left: 0.8rem;
 }
 
 .catalog-admin-clear {

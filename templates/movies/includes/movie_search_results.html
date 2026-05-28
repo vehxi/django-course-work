@@ -1,3 +1,4 @@
+{% load static %}
 {% if current_view == 'collections' %}
     <div style="margin-bottom: 30px;">
         <h2 style="font-size: var(--text-xl); color: var(--text-main); margin-bottom: 5px;">Популярные подборки</h2>
@@ -71,7 +72,7 @@
         {% empty %}
             <div class="empty-state">
                 <h3 class="empty-state-title">Ничего не найдено 😔</h3>
-                <p>Попробуйте изменить поисковый запрос или исправить опечатку.</p>
+                <p><img src="{% static 'img/scuba-cat-scuba.gif' %}" alt="Not found" style="width: 100%; max-width: 600px; border-radius: var(--radius-lg); display: block; margin: 2rem auto 1rem;"></p>
             </div>
         {% endfor %}
     </div>

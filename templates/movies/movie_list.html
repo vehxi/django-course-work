@@ -94,13 +94,13 @@
                 <input type="hidden" name="sort" id="sort-input" value="{{ current_sort }}">
                 <div class="sorting-panel {% if current_view == 'collections' %}hidden{% endif %}" style="display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
                     <span class="sorting-label" style="color: var(--text-secondary); padding: 5px 0;">Сортировка:</span>
-                    <button type="button" class="sort-btn {% if current_sort == '-id' %}active{% endif %}" onclick="document.getElementById('sort-input').value='-id'; document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
+                    <button type="button" class="sort-btn {% if current_sort == '-id' %}active{% endif %}" onclick="document.getElementById('sort-input').value='-id'; document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
                        Новинки
                     </button>
-                    <button type="button" class="sort-btn {% if current_sort == 'rating' %}active{% endif %}" onclick="document.getElementById('sort-input').value='rating'; document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
+                    <button type="button" class="sort-btn {% if current_sort == 'rating' %}active{% endif %}" onclick="document.getElementById('sort-input').value='rating'; document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
                        По рейтингу
                     </button>
-                    <button type="button" class="sort-btn {% if current_sort == 'title' %}active{% endif %}" onclick="document.getElementById('sort-input').value='title'; document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
+                    <button type="button" class="sort-btn {% if current_sort == 'title' %}active{% endif %}" onclick="document.getElementById('sort-input').value='title'; document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); document.getElementById('search-form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));">
                        По алфавиту
                     </button>
                 </div>
